@@ -54,7 +54,7 @@ app.post('/', async (req, res) => {
 	res.json({
 		success: true,
 		website: req.body.website,
-		links: links,
+		// links: links,
 		data:
 			`<style>.product-grid-item-title{width:max-content !important}</style>` +
 			responseFromPromise.join(''),
