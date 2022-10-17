@@ -32,6 +32,10 @@ async function generateStyle(item, baseUrl) {
 	}
 }
 
+app.get('/', (req, res) => {
+	res.send('welcome to css scrapper');
+});
+
 app.post('/', async (req, res) => {
 	const response = await axios.get(req.body.website);
 	const websiteHtml = response.data;
