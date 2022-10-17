@@ -19,7 +19,6 @@ async function generateStyle(item, baseUrl) {
 		const data = response.data;
 		// check if the link is equal to the base url and copies the head tags because some fonts werent downloaded
 		if (item === baseUrl) {
-			console.log('base url: ', item);
 			const $ = cheerio.load(response.data);
 			$('script').remove();
 			$('meta').remove();
