@@ -37,7 +37,15 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', async (req, res) => {
-	const response = await axios.get(req.body.website);
+	let baseUrl = req.body.website;
+	if (baseUrl.indexOf('?') >= 0) {
+		baseUrl = baseUrl.substr(0, baseUrl.indexOf('?'));
+	}
+
+	if (baseUrl.indexOf('#') >= 0) {
+		baseUrl = baseUrl.substr(0, baseUrl.indexOf('#'));
+	}
+	const response = await axios.get(baseUrl);
 	const websiteHtml = response.data;
 	const $ = cheerio.load(websiteHtml);
 	const links = [];
@@ -49,7 +57,7 @@ app.post('/', async (req, res) => {
 			if (
 				(elem.includes('cdn') ||
 					elem.includes('css') ||
-					elem === req.body.website ||
+					elem === baseUrl ||
 					elem.includes('fonts')) &&
 				!elem.includes('.png') &&
 				!elem.includes('.judge') &&
@@ -64,7 +72,7 @@ app.post('/', async (req, res) => {
 		});
 
 	const responseFromPromise = await Promise.all([
-		...links.map((item) => generateStyle(item, req.body.website)),
+		...links.map((item) => generateStyle(item, baseUrl)),
 	]);
 
 	res.json({
