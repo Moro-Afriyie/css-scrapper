@@ -37,6 +37,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', async (req, res) => {
+	console.log('body: ', req.body);
 	let baseUrl = req.body.website;
 
 	console.log('baseUrl: ', baseUrl);
