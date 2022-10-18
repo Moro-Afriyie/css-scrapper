@@ -24,9 +24,10 @@ async function generateStyle(item, baseUrl) {
 			$('script').remove();
 			$('meta').remove();
 			$('noscript').remove();
-			return `<style>${$('head').html()}</style>`;
+			// return `<style>${$('head').html()}</style>`;
+			return `${$('head').html()}`;
 		} else {
-			return `<style>${data}</style>`;
+			return `${data}`;
 		}
 	} catch (error) {
 		return '';
@@ -80,9 +81,8 @@ app.get('/', async (req, res) => {
 	res.json({
 		success: true,
 		website: baseUrl,
-		// links: links,
 		data:
-			`<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}}</style>` +
+			`@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};` +
 			responseFromPromise.join(''),
 	});
 });
