@@ -40,7 +40,8 @@ app.get('/', (req, res) => {
 app.post('/', async (req, res) => {
 	console.log('body: ', req.body);
 
-	let baseUrl = req.body.website;
+	let baseUrl =
+		typeof req.body.website === string ? JSON.parse(req.body.website) : req.body.website;
 
 	console.log('baseUrl: ', baseUrl);
 
