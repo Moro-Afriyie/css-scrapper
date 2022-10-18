@@ -81,9 +81,9 @@ app.get('/', async (req, res) => {
 	res.json({
 		success: true,
 		website: baseUrl,
-		data:
-			`@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};` +
-			responseFromPromise.join(''),
+		data: `${responseFromPromise.join(
+			''
+		)}<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};</style>`,
 	});
 });
 
