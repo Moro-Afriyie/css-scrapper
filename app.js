@@ -10,6 +10,7 @@ const port = process.env.PORT || 3030;
 
 app.use(cors());
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 async function generateStyle(item, baseUrl) {
