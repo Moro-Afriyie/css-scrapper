@@ -38,9 +38,18 @@ app.get('/', (req, res) => {
 
 app.post('/', async (req, res) => {
 	console.log('body: ', req.body);
+
 	let baseUrl = req.body.website;
 
 	console.log('baseUrl: ', baseUrl);
+
+	if (!baseUrl) {
+		return res.status(400).json({
+			success: false,
+			error: true,
+			message: 'pass a valid json body',
+		});
+	}
 
 	if (baseUrl.indexOf('?') >= 0) {
 		baseUrl = baseUrl.substr(0, baseUrl.indexOf('?'));
