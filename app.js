@@ -38,6 +38,9 @@ app.get('/', (req, res) => {
 
 app.post('/', async (req, res) => {
 	let baseUrl = req.body.website;
+
+	console.log('baseUrl: ', baseUrl);
+
 	if (baseUrl.indexOf('?') >= 0) {
 		baseUrl = baseUrl.substr(0, baseUrl.indexOf('?'));
 	}
