@@ -33,24 +33,11 @@ async function generateStyle(item, baseUrl) {
 	}
 }
 
-app.get('/', (req, res) => {
-	res.send('welcome to css scrapper');
-});
-
-app.post('/', async (req, res) => {
-	console.log('body: ', req.body);
-
-	let baseUrl =
-		typeof req.body.website === 'string' ? JSON.parse(req.body.website) : req.body.website;
-
-	console.log('baseUrl: ', baseUrl);
+app.get('/', async (req, res) => {
+	let baseUrl = req.query.website;
 
 	if (!baseUrl) {
-		return res.status(400).json({
-			success: false,
-			error: true,
-			message: 'pass a valid json body',
-		});
+		return res.status(200).send('welcome to css scrapper');
 	}
 
 	if (baseUrl.indexOf('?') >= 0) {
@@ -92,48 +79,13 @@ app.post('/', async (req, res) => {
 
 	res.json({
 		success: true,
-		website: req.body.website,
+		website: baseUrl,
 		// links: links,
 		data:
 			`<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}}</style>` +
 			responseFromPromise.join(''),
 	});
 });
-
-// app.get('/autoimmune', async (req, res) => {
-// 	try {
-// 		const baseUrl = 'https://autoimmune-institute.com/';
-// 		const response = await axios.get(baseUrl);
-
-// 		const websiteHtml = response.data;
-// 		const $ = cheerio.load(websiteHtml);
-// 		const links = [];
-
-// 		// gets all the links with href in the head tag
-// 		$('head')
-// 			.find('link')
-// 			.attr('href', (item, elem) => {
-// 				if (
-// 					(elem.includes('cdn') ||
-// 						elem.includes('css') ||
-// 						elem === baseUrl ||
-// 						elem.includes('fonts')) &&
-// 					!elem.includes('.png') &&
-// 					!elem.includes('.judge') &&
-// 					!elem.includes('cdnjs')
-// 				) {
-// 					if (elem.includes('https') || elem.includes('http')) {
-// 						links.push(elem);
-// 					} else {
-// 						links.push(`https:${elem}`);
-// 					}
-// 				}
-// 			});
-// 		res.json({ data: links });
-// 	} catch (error) {
-// 		console.log('error: ', error);
-// 	}
-// });
 
 app.listen(port, () => {
 	console.log(`server listening on http://localhost:${port}`);
