@@ -3,10 +3,14 @@ const cors = require('cors');
 const cheerio = require('cheerio');
 const axios = require('axios');
 require('dotenv').config();
+const redis = require('redis');
 
 const app = express();
 
 const port = process.env.PORT || 3030;
+const client = redis.createClient({
+	url: `redis://rediscloud:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+});
 
 app.use(cors());
 
