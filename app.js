@@ -8,8 +8,31 @@ const redis = require('redis');
 const app = express();
 
 const port = process.env.PORT || 3030;
-const client = redis.createClient({
-	url: `redis://rediscloud:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+// const redisClient = redis.createClient({
+// 	url: `redis://default:${process.env.REDIS_PASSWORD}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+// });
+
+const redisClient = redis.createClient({
+	socket: {
+		host: process.env.REDIS_HOST,
+		port: process.env.REDIS_PORT,
+	},
+	password: process.env.REDIS_PASSWORD,
+	legacyMode: true,
+});
+
+(async () => {
+	await redisClient.connect();
+})();
+
+console.log('Connecting to the Redis');
+
+redisClient.on('ready', () => {
+	console.log('Connected!');
+});
+
+redisClient.on('error', (err) => {
+	console.log('Error in the Connection');
 });
 
 app.use(cors());
@@ -52,42 +75,66 @@ app.get('/', async (req, res) => {
 	if (baseUrl.indexOf('#') >= 0) {
 		baseUrl = baseUrl.substr(0, baseUrl.indexOf('#'));
 	}
-	const response = await axios.get(baseUrl);
-	const websiteHtml = response.data;
-	const $ = cheerio.load(websiteHtml);
-	const links = [];
 
-	// gets all the links with href in the head tag
-	$('head')
-		.find('link')
-		.attr('href', (item, elem) => {
-			if (
-				(elem.includes('cdn') ||
-					elem.includes('css') ||
-					elem === baseUrl ||
-					elem.includes('fonts')) &&
-				!elem.includes('.png') &&
-				!elem.includes('.judge') &&
-				!elem.includes('cdnjs')
-			) {
-				if (elem.includes('https') || elem.includes('http')) {
-					links.push(elem);
-				} else {
-					links.push(`https:${elem}`);
-				}
-			}
-		});
+	redisClient.get(baseUrl, async (error, cssStyles) => {
+		if (error) {
+			console.log('error: ', error);
+		}
+		if (cssStyles) {
+			console.log('getting data from redis.... ');
+			return res.json({
+				success: true,
+				website: baseUrl,
+				data: `${cssStyles}<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};</style>`,
+			});
+		} else {
+			console.log('getting data from server... ');
+			const response = await axios.get(baseUrl);
+			const websiteHtml = response.data;
+			const $ = cheerio.load(websiteHtml);
+			const links = [];
 
-	const responseFromPromise = await Promise.all([
-		...links.map((item) => generateStyle(item, baseUrl)),
-	]);
+			// gets all the links with href in the head tag
+			$('head')
+				.find('link')
+				.attr('href', (item, elem) => {
+					if (
+						(elem.includes('cdn') ||
+							elem.includes('css') ||
+							elem === baseUrl ||
+							elem.includes('fonts')) &&
+						!elem.includes('.png') &&
+						!elem.includes('.judge') &&
+						!elem.includes('cdnjs')
+					) {
+						if (elem.includes('https') || elem.includes('http')) {
+							links.push(elem);
+						} else {
+							links.push(`https:${elem}`);
+						}
+					}
+				});
 
-	res.json({
-		success: true,
-		website: baseUrl,
-		data: `${responseFromPromise.join(
-			''
-		)}<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};</style>`,
+			const responseFromPromise = await Promise.all([
+				...links.map((item) => generateStyle(item, baseUrl)),
+			]);
+
+			// set the data in the redis database
+			redisClient.set(
+				baseUrl,
+				`${responseFromPromise.join(
+					''
+				)}<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};</style>`
+			);
+
+			res.json({
+				success: true,
+				website: baseUrl,
+				data: `${responseFromPromise.join(
+					''
+				)}<style>@media (min-width: 992px){.product-grid-item-title{width:max-content !important}};</style>`,
+			});
+		}
 	});
 });
 
