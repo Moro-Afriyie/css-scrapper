@@ -98,7 +98,10 @@ app.get('/', async (req, res) => {
 			$('head')
 				.find('link')
 				.attr('href', (item, elem) => {
+					console.log('element: ', elem);
+
 					if (
+						elem &&
 						(elem.includes('cdn') ||
 							elem.includes('css') ||
 							elem === baseUrl ||
