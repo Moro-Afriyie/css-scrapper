@@ -43,7 +43,9 @@ app.use(express.json());
 async function generateStyle(item, baseUrl) {
 	try {
 		// get all the css codes from the websites and create a style tag for it.. this might take a while to complete depending on the size of the array
-		const response = await axios.get(item);
+		const response = await axios.get(item, {
+			headers: { 'Accept-Encoding': 'gzip,deflate,compress' },
+		});
 		const data = response.data;
 		// check if the link is equal to the base url and copies the head tags because some fonts werent downloaded
 		if (item === baseUrl) {
@@ -89,7 +91,9 @@ app.get('/', async (req, res) => {
 			});
 		} else {
 			console.log('getting data from server... ');
-			const response = await axios.get(baseUrl);
+			const response = await axios.get(baseUrl, {
+				headers: { 'Accept-Encoding': 'gzip,deflate,compress' },
+			});
 			const websiteHtml = response.data;
 			const $ = cheerio.load(websiteHtml);
 			const links = [];
